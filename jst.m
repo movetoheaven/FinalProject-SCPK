@@ -22,7 +22,7 @@ function varargout = jst(varargin)
 
 % Edit the above text to modify the response to help jst
 
-% Last Modified by GUIDE v2.5 27-May-2022 00:03:06
+% Last Modified by GUIDE v2.5 27-May-2022 00:27:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -117,11 +117,24 @@ target_latih = xlsread('diabetes.csv',1,'H7:H734');
 data_latih = data_latih';
 target_latih = target_latih';
 
+net = newlin([0 1; 0 1; 0 1; 0 1], 1);
+net.IW{1,1,1,1} = [1 -1 1 -1]; 
+net.b{1} = [1];
+
+net.trainParam.epochs = 100;
+net = train(net, data_latih, target_latih);
+
+a = sim(net, data_latih);
+e = a - target_latih;
+
+% mendapatkan nilai weight dan bias baru
+net.IW{1,1,1,1};
+net.b{1} ;
+
 Bp = str2double(get(handles.blood,'string'));
 In = str2double(get(handles.insulin,'string'));
 Bmi = str2double(get(handles.bmi,'string'));
 Age = str2double(get(handles.age,'string'));
-
 
 n = [Bp In Bmi Age];
 maxN = max(n);
@@ -136,20 +149,10 @@ Age = ((Age - minN)/selisih);
 m = [Bp In Bmi Age];
 m = m';
 
-net = newlin([0 1; 0 1; 0 1; 0 1], 1);
-net.IW{1,1,1,1} = [1 -1 1 -1]; 
-net.b{1} = [1];
+b = sim(net, m);
+%e = b - target_latih;
 
-net.trainParam.epochs = 100;
-net = train(net, data_latih, target_latih);
-a = sim(net, m);
-%e = a - target_latih;
-
-% mendapatkan nilai weight dan bias baru
-net.IW{1,1,1,1,1}; %= [0.5705 0.0068 1.1679];
-net.b{1}; %= [3016008];
-
-glucose = ((((a-0.1)*(selisih))/0.8)+minN);
+glucose = ((((b-0.1)*(selisih))/0.8)+minN)
 set(handles.glu,'string',glucose);
 
 
@@ -301,4 +304,3 @@ set(handles.insulin,'string','');
 set(handles.bmi,'string','');
 set(handles.age,'string','');
 set(handles.glu,'string','');
-
